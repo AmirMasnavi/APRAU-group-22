@@ -13,6 +13,6 @@
 - Use seed 22. Retain unusual records unless a documented reason supports removal. IQR flags are descriptive, not a deletion rule.
 - Update memory.md at meaningful milestones and before commits; include decisions, unresolved questions, validation, and next steps. Update data.md when new facts are established.
 - Make an initial documentation commit before EDA; commit completed milestones. Stage intended files only; exclude environments, caches, secrets, and temporary files.
-- This user requested a new PRIVATE GitHub repository and pushing this work. Verify privacy before pushing. Never expose the repository publicly.
-- This user requested an independent agent review before the final push; obtain it, evaluate suggestions, implement sensible changes, and record the outcome in docs/review.md.
+- Latest user instruction (2026-10-06) requests a new PUBLIC GitHub repository and an immediate push of current files; this explicitly replaces the earlier private-repository requirement. Verify the requested visibility before pushing.
+- Independent review remains required before delivering completed EDA. The latest user instruction requests publishing current unfinished files immediately; do not describe this draft publication as reviewed or completed EDA.
 - Credit consulted sources. Preserve group contribution history and prepare work that all group members can explain.

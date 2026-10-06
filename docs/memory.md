@@ -3,10 +3,10 @@
 Last updated: 2026-10-06 (Europe/Lisbon)
 
 ## Current status
-Documentation bootstrap complete; EDA notebook not yet created. This file is being saved before the initial commit, as requested. Dataset and assignment have been inspected; original files preserved.
+Documentation bootstrap committed. Draft EDA notebook and builder created, but execution failed before any analysis cells ran: sandbox disallowed the local Jupyter kernel socket. No reports generated. User then requested creating a PUBLIC repository and pushing current files immediately. Original source files preserved.
 
 ## User preferences and scope
-Casual initial EDA, concise chat, thorough checks. Notebook code sandwiched between intent and findings markdown; final consolidated conclusion. Create docs first and commit before EDA. New private repository; independent second-agent review and sensible improvements before final push.
+Casual initial EDA, concise chat, thorough checks. Notebook code sandwiched between intent and findings markdown; final consolidated conclusion. Create docs first and commit before EDA. Latest instruction overrides the original private preference: create a PUBLIC repository and push current work immediately. EDA execution and independent review are pending; draft publication is not completed EDA.
 
 ## Confirmed facts and decisions
 - Course assignment is APRAU 2026/2027, group dataset 22; workspace spelling APREU does not change assignment naming.
@@ -20,10 +20,9 @@ Casual initial EDA, concise chat, thorough checks. Notebook code sandwiched betw
 Teacher's code key, regression biomarker name/units, feature provenance/timing, profile independence, group details, PL teacher GitHub username, exact intermediate scope.
 
 ## Next steps
-1. Commit this starting documentation.
-2. Build and execute the introductory EDA notebook and derived reports; update data.md.
-3. Obtain independent review, improve meaningful findings, rerun verification.
-4. Update memory and commit final reviewed work; create/verify private repository and push.
+1. Commit the current draft and updated publication preference; create/verify a public repository and push as requested.
+2. On resuming EDA, execute the notebook with local kernel access and update data.md with generated evidence.
+3. Obtain independent review, implement sensible changes, rerun verification and commit completed milestones.
 
 ## Validation
 Initial CSV SHA-256 recorded in data.md; assignment text read in full. No models trained.

@@ -4,7 +4,7 @@
 Apply machine learning to the supplied multi-disease patient-profile dataset for the ISEP Master's in Informatics Engineering, APRAU 2026/2027. The local folder is named APREUProject; the assignment uses APRAU. Each row represents a patient profile with a diagnostic classification target and a continuous laboratory regression target.
 
 ## Current scope
-Create persistent documentation and an executed introductory notebook that shows actual records and formats, audits quality, justifies light cleaning, gives descriptive/univariate/bivariate EDA, clarifies the two modeling tasks, and concludes with everything learned. No fitted predictive models in this stage. Use intent → code → findings throughout. Get an independent agent review, improve the work, and push to a new private GitHub repository.
+Create persistent documentation and an executed introductory notebook that shows actual records and formats, audits quality, justifies light cleaning, gives descriptive/univariate/bivariate EDA, clarifies the two modeling tasks, and concludes with everything learned. No fitted predictive models in this stage. Use intent → code → findings throughout. Get an independent agent review, improve the work, and push to a new GitHub repository. The latest user instruction requests public visibility and an immediate push of the current draft.
 
 ## Full assignment roadmap (not all implemented now)
 1. EDA: descriptive statistics, univariate and bivariate analysis; justify constant, redundant, or uninformative features.
@@ -14,7 +14,7 @@ Create persistent documentation and an executed introductory notebook that shows
 5. Notebook submission and group defense; every member must understand the work; credit materials and consulted sources.
 
 ## Delivery requirements from the assignment
-- GitHub version control is mandatory; share the private repository with the PL teacher when their username is provided.
+- GitHub version control is mandatory; provide the repository to the PL teacher when their username is provided. Public visibility was explicitly requested by the user on 2026-10-06.
 - Moodle intermediate submission: **2 November 2026**, 25% of final grade; final: **20 December 2026**, 45%. Confirm Moodle cut-off times and exact intermediate scope with the teacher.
 - ZIP naming: `APRAU_AAA_CCC_Num1_Num2_Num3.zip` (teacher acronym, class, student numbers).
 - Normally 3 group members (2 exceptionally); mandatory individual defense. Assignment says individual defense accounts for 70% of the project grade; do not conflate that with the submission weightings.
