@@ -3,7 +3,7 @@
 Last updated: 2026-10-06 (Europe/Lisbon)
 
 ## Current status
-Documentation bootstrap committed. Draft EDA notebook and builder created, but execution failed before any analysis cells ran: sandbox disallowed the local Jupyter kernel socket. No reports generated. User then requested creating a PUBLIC repository and pushing current files immediately. Original source files preserved.
+Documentation bootstrap committed. Draft EDA notebook and builder created, but execution failed before any analysis cells ran: sandbox disallowed the local Jupyter kernel socket. No reports generated. User then requested creating a PUBLIC repository and pushing current files immediately. Original source files preserved. Public repository created and visibility verified: https://github.com/AmirMasnavi/APRAU-group-22. Draft committed as c04e790; publishing the current main branch next.
 
 ## User preferences and scope
 Casual initial EDA, concise chat, thorough checks. Notebook code sandwiched between intent and findings markdown; final consolidated conclusion. Create docs first and commit before EDA. Latest instruction overrides the original private preference: create a PUBLIC repository and push current work immediately. EDA execution and independent review are pending; draft publication is not completed EDA.
@@ -20,9 +20,9 @@ Casual initial EDA, concise chat, thorough checks. Notebook code sandwiched betw
 Teacher's code key, regression biomarker name/units, feature provenance/timing, profile independence, group details, PL teacher GitHub username, exact intermediate scope.
 
 ## Next steps
-1. Commit the current draft and updated publication preference; create/verify a public repository and push as requested.
+1. Complete the current main-branch push to the verified PUBLIC repository: https://github.com/AmirMasnavi/APRAU-group-22.
 2. On resuming EDA, execute the notebook with local kernel access and update data.md with generated evidence.
 3. Obtain independent review, implement sensible changes, rerun verification and commit completed milestones.
 
 ## Validation
-Initial CSV SHA-256 recorded in data.md; assignment text read in full. No models trained.
+Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft notebook format and builder syntax validated; no notebook cells executed and no models trained. Independent review remains pending.
