@@ -1,0 +1,36 @@
+feature,dtype,unique,role,observed_values_or_range,meaning_and_units
+age_level,str,4,supplied predictor,Mature | Middle | Senior | Young,Column name supplied; definitions/units unverified
+gender,str,2,supplied predictor,Female | Male,Column name supplied; definitions/units unverified
+bmi_level,str,4,supplied predictor,Normal | Obese | Overweight | Underweight,Column name supplied; definitions/units unverified
+smoking,str,3,supplied predictor,Current | Former | Never,Column name supplied; definitions/units unverified
+age,int64,72,supplied predictor,18 to 89,Column name supplied; definitions/units unverified
+age_normalized,float64,131,supplied predictor,0.183908 to 1,Column name supplied; definitions/units unverified
+bmi,float64,487,supplied predictor,15 to 59.45,Column name supplied; definitions/units unverified
+HbA1c_level,float64,110,supplied predictor,3.5 to 9,Column name supplied; definitions/units unverified
+cholesterol,float64,211,supplied predictor,150 to 299,Column name supplied; definitions/units unverified
+sleep_hours,float64,217,supplied predictor,4 to 10,Column name supplied; definitions/units unverified
+triglycerides,float64,310,supplied predictor,50 to 399,Column name supplied; definitions/units unverified
+physical_activity,str,3,supplied predictor,High | Low | Moderate,Column name supplied; definitions/units unverified
+family_history,str,2,supplied predictor,No | Yes,Column name supplied; definitions/units unverified
+stress_level,str,3,supplied predictor,High | Low | Medium,Column name supplied; definitions/units unverified
+low_hdl_cholesterol,str,2,supplied predictor,No | Yes,Column name supplied; definitions/units unverified
+high_ldl_cholesterol,str,2,supplied predictor,No | Yes,Column name supplied; definitions/units unverified
+blood_pressure,float64,140,supplied predictor,120 to 180,Column name supplied; definitions/units unverified
+sugar_consumption,str,3,supplied predictor,High | Low | Medium,Column name supplied; definitions/units unverified
+crp_level,float64,191,supplied predictor,0.0105847 to 14.6148,Column name supplied; definitions/units unverified
+homocysteine_level,float64,191,supplied predictor,5.10994 to 19.8739,Column name supplied; definitions/units unverified
+systolic_bp,float64,180,supplied predictor,90 to 179,Column name supplied; definitions/units unverified
+diastolic_bp,float64,150,supplied predictor,60 to 119,Column name supplied; definitions/units unverified
+alcohol_intake,float64,390,supplied predictor,0 to 30,Column name supplied; definitions/units unverified
+salt_intake,float64,221,supplied predictor,2 to 15,Column name supplied; definitions/units unverified
+heart_rate,float64,140,supplied predictor,50 to 99,Column name supplied; definitions/units unverified
+hdl,float64,160,supplied predictor,30 to 99,Column name supplied; definitions/units unverified
+ldl,float64,210,supplied predictor,70 to 189,Column name supplied; definitions/units unverified
+education_level,str,3,supplied predictor,Primary | Secondary | Tertiary,Column name supplied; definitions/units unverified
+employment_status,str,3,supplied predictor,Employed | Retired | Unemployed,Column name supplied; definitions/units unverified
+systolic_index,float64,180,supplied predictor,90 to 179,Column name supplied; definitions/units unverified
+calcium_baseline,float64,1,supplied predictor,9.42 to 9.42,Column name supplied; definitions/units unverified
+plasma_value,float64,2000,supplied predictor,0.762294 to 1.71649,Column name supplied; definitions/units unverified
+ldl_alternative,float64,210,supplied predictor,70 to 189,Column name supplied; definitions/units unverified
+target_regression,float64,137,regression target,70 to 300,Continuous laboratory target; biomarker and unit unknown
+target_class,str,3,classification target,DI_HT | DI_HY | HT,Existing diagnostic label; code key unknown

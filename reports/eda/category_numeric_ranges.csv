@@ -1,0 +1,13 @@
+level,count,min,max,category,numeric_feature
+Mature,653,46.0,67.0,age_level,age
+Middle,542,24.0,45.0,age_level,age
+Senior,660,68.0,89.0,age_level,age
+Young,145,18.0,23.0,age_level,age
+Normal,498,18.5,24.9436841688131,bmi_level,bmi
+Obese,804,30.0,59.45,bmi_level,bmi
+Overweight,454,25.0,29.9,bmi_level,bmi
+Underweight,244,15.0,18.4,bmi_level,bmi
+No,1647,40.0,99.0,low_hdl_cholesterol,hdl
+Yes,353,30.0,65.7254672897196,low_hdl_cholesterol,hdl
+No,978,70.0,131.379166666667,high_ldl_cholesterol,ldl
+Yes,1022,126.743654822335,189.0,high_ldl_cholesterol,ldl

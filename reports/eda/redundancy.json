@@ -1,0 +1,17 @@
+{
+  "constant_columns": [
+    "calcium_baseline"
+  ],
+  "exact_duplicate_pairs": [
+    [
+      "systolic_bp",
+      "systolic_index"
+    ]
+  ],
+  "age_normalized_formula": "(age - 2) / 87",
+  "age_max_abs_residual": 9.885057470349068e-07,
+  "age_max_distinct_normalized_per_age": 2,
+  "ldl_equal_rows": 18,
+  "ldl_same_sorted_values": true,
+  "ldl_pair_pearson": -0.004941514602905099
+}

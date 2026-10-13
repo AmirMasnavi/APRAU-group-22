@@ -1,0 +1,8 @@
+field,decision,evidence
+calcium_baseline,drop from derived copy,"constant at 9.42 across 2,000 rows"
+systolic_index,drop from derived copy,exact row-wise copy of systolic_bp
+age_normalized,drop from derived copy,one value per age; affine transform within rounding tolerance
+ldl_alternative,retain provisionally,"matching multiset, different row alignment; provenance unknown"
+all rows,retain,IQR flags and BP order flags do not justify removal
+all remaining columns,retain,"no missing values, blanks or nonfinite values found"
+target_class; target_regression,exclude both from either X,separate prediction tasks; avoid cross-target leakage
