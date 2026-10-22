@@ -38,3 +38,10 @@ Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft not
 - Each step: explanation (what/why) → code → "Conclusões" with justification. Added: R²=r² ceiling from EDA, 500-noise-feature control (TP2), real-vs-predicted plots (PL2), polynomial degree search, incremental build 1→18 features, all 2/3-combos of top-12, clinical groups, all-features overfitting, bmi+bmi_level collinearity demo, target-shape check (97.9% in 70–200, near-uniform; >200 mostly DI_HT).
 - Chosen: simple `bmi` (test R² −0.002, MAE 34.18, RMSE 40.95); multiple = incremental 7 feats (bmi, age, smoking, salt_intake, triglycerides, physical_activity, HbA1c_level): test R² 0.005, MAE 34.11, RMSE 40.81; baseline RMSE 41.02. All bootstrap CIs vs baseline include 0.
 - Seed kept at 22 (project rule) although EDA_version3 uses 42 — group should align.
+
+## 2026-10-22 — Classification notebook (Parte 3)
+- Created `notebooks/03_classification.ipynb` via `scripts/build_classification.py` + `scripts/classification_findings.py` (same explain→code→conclusions style). Based on slides docs/theory_lessons/T3 & T4 and class notebooks TP3/TP4/bootstrap OOB.
+- Same prep as regression (31 feats, both targets excluded). Models: LR multinomial and LDA, each default and imbalance-adjusted (class_weight='balanced' / priors=[1/3]*3), StandardScaler in pipeline. Primary metric macro-F1 + balanced accuracy + per-class recall.
+- Key results (10-fold strat.): LR default recall DI_HT 0.07, LDA 0.19; LDA default best macro-F1 0.645 (p=0.043 vs LR); weighted: LR bal_acc 0.714 vs LDA 0.686 (n.s.). LDA assumptions violated (Shapiro, Levene). Recommended: LDA (equal priors for screening).
+- Variance: holdout dp 0.02–0.036 (100 seeds); k-fold estimate dp 0.004–0.011; LOOCV deterministic; bootstrap OOB pessimistic (~63% distinct). k effect: between-fold dp rises with k, estimate dp falls; recommend 10-fold for Part 4.
+- Not committed.
