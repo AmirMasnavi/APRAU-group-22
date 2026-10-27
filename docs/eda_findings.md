@@ -78,8 +78,9 @@ Everything else is closer to zero. Spearman ≈ Pearson throughout → **no hidd
 relationship**. Best single feature explains **r² ≈ 0.48%** of the variance.
 
 Categorical vs `target_regression`: only `target_class` has any effect (**η² = 0.027**, F = 27.881,
-p_anova 1.14e-12, p_kruskal 5.31e-06) — and it is the other target, so it **cannot be used as a
-predictor**. All other categoricals have η² ≤ 0.006.
+p_anova 1.14e-12, p_kruskal 5.31e-06). It is the target of the *other* task, not of this one, so it
+**can be used as a predictor** in the regression (as binary indicators). All other categoricals have
+η² ≤ 0.006.
 ANOVA and Kruskal-Wallis disagree on borderline cases (`physical_activity`: p_anova 0.047 vs
 p_kruskal 0.333). Since `target_regression` is not normal, **trust Kruskal-Wallis**.
 

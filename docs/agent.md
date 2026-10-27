@@ -10,7 +10,7 @@
 - Do not infer clinical meanings, diagnostic thresholds, biomarker units, or data provenance from column names alone. Distinguish assignment definitions from empirical observations and hypotheses.
 - Fit imputation, encoding, scaling, feature selection, and sampling on training folds only when modeling begins. Do not select features or tune on the final test set.
 - Account for severe class imbalance; use stratification and report macro-F1, balanced accuracy, per-class recall, and confusion matrices, with accuracy as secondary.
-- Use seed 22. Retain unusual records unless a documented reason supports removal. IQR flags are descriptive, not a deletion rule.
+- Use seed 42. Retain unusual records unless a documented reason supports removal. IQR flags are descriptive, not a deletion rule.
 - Update memory.md at meaningful milestones and before commits; include decisions, unresolved questions, validation, and next steps. Update data.md when new facts are established.
 - Make an initial documentation commit before EDA; commit completed milestones. Stage intended files only; exclude environments, caches, secrets, and temporary files.
 - Latest user instruction (2026-10-06) requests a new PUBLIC GitHub repository and an immediate push of current files; this explicitly replaces the earlier private-repository requirement. Verify the requested visibility before pushing.
