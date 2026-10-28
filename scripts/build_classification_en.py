@@ -72,21 +72,23 @@ raw['target_class'].value_counts().to_frame('n').assign(**{'%': lambda d: d['n']
 step('''
 ### 1.2 Feature removal, encoding and predictor matrix
 
-We apply **the same preparation as in the regression notebook**, for the same reasons (EDA, section 4.2):
+We apply **the same preparation as in the regression notebook**, for the same reasons (EDA, `01_EDA`):
 - we remove `calcium_baseline` (constant), `systolic_index` (copy of `systolic_bp`) and `age_normalized` (rescaling
   of `age`). The last two would make the covariance matrix **singular**, which is a direct problem for LDA, since it
   has to invert that matrix;
+- we also remove `ldl_alternative`: it has the same values as `ldl`, but shuffled across patients (it matches on only
+  18 of 2000 rows). The value does not belong to the patient in that row, so it is noise;
 - we convert the categorical variables into numbers (ordinal → 0, 1, 2…; binary → 0/1; `employment_status` →
   *one-hot*);
 - **we remove both targets from the predictors**: `target_class` is what we want to predict and `target_regression`
   is the other outcome of the assignment.
 
-All remaining 31 features are kept. Feature selection is the topic of Part 4 (Ridge/Lasso); here the goal is to
+All remaining 30 features are kept. Feature selection is the topic of Part 4 (Ridge/Lasso); here the goal is to
 compare classification and resampling methods under the same conditions.
 ''', '''
 TARGET = 'target_class'
 CLASSES = ['DI_HY', 'HT', 'DI_HT']          # fixed order: majority -> minorities
-DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized']
+DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized', 'ldl_alternative']
 ORDINAL = {
     'age_level': ['Young', 'Middle', 'Mature', 'Senior'],
     'bmi_level': ['Underweight', 'Normal', 'Overweight', 'Obese'],
@@ -117,7 +119,7 @@ step('''
 
 The EDA showed that `target_class` is **highly imbalanced** (≈ 90% `DI_HY`). Under these conditions *accuracy* is
 misleading: a model that always answers `DI_HY` is right ≈ 90% of the time without having learned anything. We
-therefore use the metrics from slides T4 (11–18), adapted to 3 classes:
+therefore use the following metrics, adapted to 3 classes:
 
 | Metric | What it measures | Why it is useful here |
 |---|---|---|
@@ -147,7 +149,7 @@ md(FINDINGS.get('models_intro', 'FINDINGS::models_intro'))
 step('''
 ### 2.1 Do the LDA assumptions hold?
 
-LDA (slides T3, 29–31) assumes that, **within each class**, the features follow a **normal** distribution and that
+LDA assumes that, **within each class**, the features follow a **normal** distribution and that
 **all classes share the same covariance matrix**. Logistic Regression makes no such assumptions. Knowing whether the
 assumptions hold helps us understand which method should perform better.
 
@@ -182,10 +184,10 @@ step('''
 
 We fit both methods with scikit-learn's default options:
 - **Multinomial Logistic Regression** (generalisation of the logistic model to 3 classes, using *softmax*),
-  estimated by maximum likelihood (slide T3, 13). Features are standardised (`StandardScaler`) because scikit-learn
+  estimated by maximum likelihood. Features are standardised (`StandardScaler`) because scikit-learn
   applies a small default regularisation that depends on scale;
 - **LDA**, which estimates the class means, a common covariance and the **prior probabilities** πₖ from the class
-  proportions in the training data (slide T3, 30).
+  proportions in the training data.
 
 To avoid depending on a single data split, we use **stratified 10-fold cross-validation**: every patient receives a
 prediction made by a model that never saw them. This is the default resampling method; section 3 compares it with the
@@ -243,7 +245,7 @@ step('''
 ### 2.4 Which version to use? Comparison with statistical significance
 
 The differences between versions may be small. To know whether they are **real** or due to which patients fell into
-each fold, we follow slides T4 (31–33): we compute macro F1 and *balanced accuracy* on **each of the 10 folds**, using
+each fold, we compute macro F1 and *balanced accuracy* on **each of the 10 folds**, using
 the **same partitions** for all models, and apply a **paired *t*-test** between models.
 ''', '''
 fold_scores = {}
@@ -274,12 +276,12 @@ md(FINDINGS.get('resampling_intro', 'FINDINGS::resampling_intro'))
 step('''
 ### 3.1 *Holdout* (validation set approach)
 
-**How it works (slide T4, 19):** the data are split once into training (70%) and test (30%); the model learns on the
+**How it works:** the data are split once into training (70%) and test (30%); the model learns on the
 training set and is evaluated on the test set. We use a **stratified** split so that the 3 classes appear in the test
 set in the same proportions as in the dataset: with only 85 `DI_HT`, a non-stratified split could leave the test set
 with very few of them.
 
-We show the full report (`classification_report`, as in slide T3, 37) for the four models.
+We show the full report (`classification_report`) for the four models.
 ''', '''
 X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.30, stratify=y, random_state=SEED)
 print('Test:', y_te.value_counts().to_dict())
@@ -296,8 +298,8 @@ pd.DataFrame(holdout).T
 step('''
 ### 3.2 How much does the *holdout* vary? Repeating the split 100 times
 
-The result of a *holdout* depends on **which** patients ended up in the test set. The slides (T4, 20 and 36–37) show
-that the estimate has variance: a different split gives a different result. To measure this variance, we repeat the
+The result of a *holdout* depends on **which** patients ended up in the test set: the estimate has variance, and a
+different split gives a different result. To measure this variance, we repeat the
 stratified *holdout* with **100 different seeds** and look at how the metrics are distributed.
 ''', '''
 def repeated_holdout(model, n_rep=100, test_size=0.30):
@@ -320,9 +322,9 @@ pd.DataFrame({n: {'mean': r.f1_macro.mean(), 'sd': r.f1_macro.std(), 'min': r.f1
 step('''
 ### 3.3 *k-fold* cross-validation (k = 5 and k = 10)
 
-**How it works (slides T4, 21–26):** the data are divided into *k* parts (*folds*); each fold serves once as the test
-set while the other *k−1* train the model. Every patient is tested **exactly once**. We use the **stratified** version
-(slide 26): with imbalanced classes, each fold keeps the class proportions.
+**How it works:** the data are divided into *k* parts (*folds*); each fold serves once as the test
+set while the other *k−1* train the model. Every patient is tested **exactly once**. We use the **stratified** version:
+with imbalanced classes, each fold keeps the class proportions.
 
 There are **two kinds of variance** to distinguish:
 1. **Between folds:** how much the *k* metrics vary within a single cross-validation;
@@ -355,7 +357,7 @@ kfold_table
 step('''
 ### 3.4 *Leave-One-Out* (LOOCV)
 
-**How it works (slide T4, 27):** it is the extreme case of *k-fold*, with *k = N* = 2000. The model is trained 2000
+**How it works:** it is the extreme case of *k-fold*, with *k = N* = 2000. The model is trained 2000
 times, always with 1999 patients, and tested on the patient left out.
 
 Two important particularities:
@@ -377,12 +379,12 @@ loo_table
 step('''
 ### 3.5 *Bootstrap* with *out-of-bag* (OOB) evaluation
 
-**How it works (slides T4, 41–46, and the class example):** at each iteration we draw a sample **with replacement**
+**How it works:** at each iteration we draw a sample **with replacement**
 of the same size as the dataset (2000). Some patients appear repeated and others are left out; the probability of a
 patient being left out is $(1 - 1/N)^N \approx e^{-1} \approx 36.8\%$. The model trains on the *bootstrap* sample
 and is evaluated on the left-out (*out-of-bag*) patients, which it never saw.
 
-We repeat this **200 times** (as in the class example) and obtain the distribution of the metrics, the mean, the
+We repeat this **200 times** and obtain the distribution of the metrics, the mean, the
 standard deviation and a 95% confidence interval (2.5th and 97.5th percentiles).
 ''', '''
 def bootstrap_oob(model, B=200, seed=SEED):
@@ -455,7 +457,7 @@ variance[variance.model.isin(['Logistic (weighted)', 'LDA (equal priors)'])].set
 step('''
 ### 4.2 The effect of *k* in cross-validation
 
-The slides (T4, 40) summarise the trade-off in choosing *k*:
+Choosing *k* involves a trade-off:
 - **small *k*** → each model trains on less data → **pessimistic** (more biased) estimate, but more stable and
   cheaper;
 - **large *k*** (in the limit, LOOCV) → training on almost all the data → **low-bias** estimate, but the models are

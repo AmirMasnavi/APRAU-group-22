@@ -72,20 +72,22 @@ raw['target_class'].value_counts().to_frame('n').assign(**{'%': lambda d: d['n']
 step('''
 ### 1.2 Remoção de features, codificação e matriz de preditores
 
-Aplicamos **a mesma preparação do notebook da regressão**, pelas mesmas razões (EDA, secção 4.2):
+Aplicamos **a mesma preparação do notebook da regressão**, pelas mesmas razões (EDA, `01_EDA`):
 - removemos `calcium_baseline` (constante), `systolic_index` (cópia de `systolic_bp`) e `age_normalized` (reescala
-  de `age`). As duas últimas tornariam a matriz de covariâncias **singular**, o que é um problema direto para a LDA,
-  que tem de inverter essa matriz;
+  de `age`). Estas duas últimas tornariam a matriz de covariâncias **singular**, o que é um problema direto para a
+  LDA, que tem de inverter essa matriz;
+- removemos também `ldl_alternative`: tem os mesmos valores de `ldl`, mas trocados entre pacientes (coincide em só
+  18 de 2000 linhas). O valor não pertence ao paciente da linha, por isso é ruído;
 - convertemos as categóricas em números (ordinais → 0, 1, 2…; binárias → 0/1; `employment_status` → *one-hot*);
 - **retiramos os dois targets dos preditores**: `target_class` é o que queremos prever e `target_regression` é o
   outro resultado do trabalho.
 
-As restantes 31 features ficam todas. A seleção de features é o tema da Parte 4 (Ridge/Lasso); aqui o objetivo é
+As restantes 30 features ficam todas. A seleção de features é o tema da Parte 4 (Ridge/Lasso); aqui o objetivo é
 comparar métodos de classificação e de reamostragem nas mesmas condições.
 ''', '''
 TARGET = 'target_class'
 CLASSES = ['DI_HY', 'HT', 'DI_HT']          # ordem fixa: maioritária -> minoritárias
-DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized']
+DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized', 'ldl_alternative']
 ORDINAL = {
     'age_level': ['Young', 'Middle', 'Mature', 'Senior'],
     'bmi_level': ['Underweight', 'Normal', 'Overweight', 'Obese'],
@@ -115,8 +117,8 @@ step('''
 ### 1.3 Métricas de avaliação: porque não basta a *accuracy*
 
 A EDA mostrou que `target_class` é **muito desequilibrada** (≈ 90% `DI_HY`). Nestas condições, a *accuracy* engana:
-um modelo que responda sempre `DI_HY` acerta em ≈ 90% dos casos sem ter aprendido nada. Usamos por isso as métricas
-dos slides T4 (11–18), adaptadas a 3 classes:
+um modelo que responda sempre `DI_HY` acerta em ≈ 90% dos casos sem ter aprendido nada. Usamos por isso as seguintes
+métricas, adaptadas a 3 classes:
 
 | Métrica | O que mede | Porque é útil aqui |
 |---|---|---|
@@ -147,7 +149,7 @@ md(FINDINGS.get('models_intro', 'FINDINGS::models_intro'))
 step('''
 ### 2.1 Os pressupostos da LDA verificam-se?
 
-A LDA (slides T3, 29–31) assume que, **dentro de cada classe**, as features seguem uma distribuição **normal** e que
+A LDA assume que, **dentro de cada classe**, as features seguem uma distribuição **normal** e que
 **todas as classes têm a mesma matriz de covariâncias**. A Regressão Logística não faz estas suposições. Saber se os
 pressupostos se verificam ajuda a perceber qual dos métodos deve funcionar melhor.
 
@@ -181,10 +183,10 @@ step('''
 
 Ajustamos os dois métodos com as opções por defeito do scikit-learn:
 - **Regressão Logística multinomial** (generalização da logística para 3 classes, com *softmax*), estimada por máxima
-  verosimilhança (slide T3, 13). As features são padronizadas (`StandardScaler`), porque o scikit-learn aplica por
+  verosimilhança. As features são padronizadas (`StandardScaler`), porque o scikit-learn aplica por
   defeito uma pequena regularização que depende da escala;
 - **LDA**, que estima as médias de cada classe, uma covariância comum e as **probabilidades a priori** πₖ a partir
-  das proporções das classes no treino (slide T3, 30).
+  das proporções das classes no treino.
 
 Para não depender de uma única divisão dos dados, usamos **validação cruzada estratificada 10-fold**: cada paciente
 recebe uma previsão feita por um modelo que nunca o viu. É o método de reamostragem padrão; a secção 3 compara-o com
@@ -242,7 +244,7 @@ step('''
 ### 2.4 Que versão usar? Comparação com significância estatística
 
 As diferenças entre versões podem ser pequenas. Para saber se são **reais** ou fruto de quais pacientes calharam em
-cada fold, seguimos os slides T4 (31–33): obtemos o F1 macro e a *balanced accuracy* em **cada um dos 10 folds**,
+cada fold, obtemos o F1 macro e a *balanced accuracy* em **cada um dos 10 folds**,
 com as **mesmas partições** para todos os modelos, e aplicamos um **teste *t* emparelhado** entre modelos.
 ''', '''
 fold_scores = {}
@@ -273,11 +275,11 @@ md(FINDINGS.get('resampling_intro', 'FINDINGS::resampling_intro'))
 step('''
 ### 3.1 *Holdout* (método do conjunto de validação)
 
-**Como funciona (slide T4, 19):** divide-se os dados uma vez em treino (70%) e teste (30%); o modelo aprende no
+**Como funciona:** divide-se os dados uma vez em treino (70%) e teste (30%); o modelo aprende no
 treino e é avaliado no teste. Usamos divisão **estratificada**, para que as 3 classes apareçam no teste nas mesmas
 proporções que no dataset: com só 85 `DI_HT`, uma divisão não estratificada podia deixar o teste com muito poucos.
 
-Mostramos o relatório completo (`classification_report`, como no slide T3, 37) para os quatro modelos.
+Mostramos o relatório completo (`classification_report`) para os quatro modelos.
 ''', '''
 X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.30, stratify=y, random_state=SEED)
 print('Teste:', y_te.value_counts().to_dict())
@@ -294,8 +296,8 @@ pd.DataFrame(holdout).T
 step('''
 ### 3.2 Quanto varia o *holdout*? Repetir a divisão 100 vezes
 
-O resultado de um *holdout* depende de **quais** pacientes calharam no teste. Os slides (T4, 20 e 36–37) mostram
-que a estimativa tem variância: com outra divisão, o resultado muda. Para medir essa variância, repetimos o *holdout*
+O resultado de um *holdout* depende de **quais** pacientes calharam no teste: a estimativa tem variância, e com
+outra divisão o resultado muda. Para medir essa variância, repetimos o *holdout*
 estratificado com **100 sementes diferentes** e vemos como se distribuem as métricas.
 ''', '''
 def repeated_holdout(model, n_rep=100, test_size=0.30):
@@ -318,9 +320,9 @@ pd.DataFrame({n: {'média': r.f1_macro.mean(), 'dp': r.f1_macro.std(), 'mín': r
 step('''
 ### 3.3 Validação cruzada *k-fold* (k = 5 e k = 10)
 
-**Como funciona (slides T4, 21–26):** os dados são divididos em *k* partes (*folds*); cada fold serve uma vez de teste
+**Como funciona:** os dados são divididos em *k* partes (*folds*); cada fold serve uma vez de teste
 enquanto os outros *k−1* treinam o modelo. Cada paciente é testado **exatamente uma vez**. Usamos a versão
-**estratificada** (slide 26): com classes desequilibradas, cada fold mantém as proporções das classes.
+**estratificada**: com classes desequilibradas, cada fold mantém as proporções das classes.
 
 Há **duas formas de variância** a distinguir:
 1. **Entre folds:** quanto variam as *k* métricas dentro de uma mesma validação cruzada;
@@ -353,7 +355,7 @@ kfold_table
 step('''
 ### 3.4 *Leave-One-Out* (LOOCV)
 
-**Como funciona (slide T4, 27):** é o caso extremo do *k-fold*, com *k = N* = 2000. Treina-se o modelo 2000 vezes,
+**Como funciona:** é o caso extremo do *k-fold*, com *k = N* = 2000. Treina-se o modelo 2000 vezes,
 sempre com 1999 pacientes, e testa-se no paciente que ficou de fora.
 
 Duas particularidades importantes:
@@ -375,12 +377,12 @@ loo_table
 step('''
 ### 3.5 *Bootstrap* com avaliação *out-of-bag* (OOB)
 
-**Como funciona (slides T4, 41–46, e o exemplo das aulas):** em cada iteração tira-se uma amostra **com reposição**
+**Como funciona:** em cada iteração tira-se uma amostra **com reposição**
 do mesmo tamanho do dataset (2000). Alguns pacientes aparecem repetidos e outros ficam de fora; a probabilidade de um
 paciente ficar de fora é $(1 - 1/N)^N \\approx e^{-1} \\approx 36.8\\%$. O modelo treina com a amostra *bootstrap* e é
 avaliado nos pacientes que ficaram de fora (*out-of-bag*), que nunca viu.
 
-Repetimos **200 vezes** (como no exemplo das aulas) e obtemos a distribuição das métricas, a média, o desvio padrão e
+Repetimos **200 vezes** e obtemos a distribuição das métricas, a média, o desvio padrão e
 um intervalo de confiança a 95% (percentis 2.5 e 97.5).
 ''', '''
 def bootstrap_oob(model, B=200, seed=SEED):
@@ -453,7 +455,7 @@ variance[variance.modelo.isin(['Logística (pesos)', 'LDA (priors iguais)'])].se
 step('''
 ### 4.2 O efeito de *k* na validação cruzada
 
-Os slides (T4, 40) resumem o compromisso na escolha de *k*:
+A escolha de *k* envolve um compromisso:
 - ***k* pequeno** → cada modelo treina com menos dados → estimativa **pessimista** (mais enviesada), mas mais
   estável e mais barata;
 - ***k* grande** (no limite, LOOCV) → treino quase com todos os dados → estimativa **pouco enviesada**, mas os

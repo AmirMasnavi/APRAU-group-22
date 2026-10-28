@@ -59,3 +59,7 @@ Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft not
 - `ldl_alternative` added to DROP_EDA in `scripts/build_regression.py` (EDA decided to remove it: values of `ldl` permuted across rows). Now 30 candidate features (17 continuous). Rebuilt `notebooks/02_regression.ipynb`; texts in `scripts/regression_findings.py` updated.
 - Chosen models and their test results unchanged (ldl_alternative was never selected). Changed: all-features model (train R² 0.0370, CV RMSE 41.79, test RMSE 41.26), lipid group, and "all continuous" group now marginally beats baseline (41.373 vs 41.385).
 - OPEN: docs/agent.md now says seed 42 (commit 0a59270), but regression and classification builders still use SEED = 22. Group must decide; switching regression to 42 changes the chosen simple feature (bmi → HbA1c_level) and requires rewriting texts.
+
+## 2026-10-28 — Classification updated (PT + EN)
+- `ldl_alternative` removed (30 features) in `build_classification.py` / `_en.py`; all references to slides/class exercises removed from notebook texts (only ISLP and scikit-learn docs remain as references). Both notebooks rebuilt, no errors; findings texts rewritten with new numbers.
+- Key changes: LDA vs Logistic (unadjusted) macro-F1 now +0.047, p = 0.054 (was 0.043 → now borderline, not significant); with adjustment LDA wins macro-F1 in 6/6 methods (incl. LOOCV). Recommendation unchanged: LDA (equal priors for screening). LOOCV timings vary between runs, so texts use approximate values.
