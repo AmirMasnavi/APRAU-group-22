@@ -21,13 +21,13 @@ FINDINGS = {
 3. **Comparação e discussão:** avaliar os dois modelos com R², MAE e RMSE e discutir os resultados.
 
 ### Ponto de partida: o que a EDA já nos disse
-A análise exploratória (`EDA_version3.ipynb`) deixou três indicações que orientam tudo o que se segue:
+A análise exploratória (`01_EDA.ipynb`) deixou três indicações que orientam tudo o que se segue:
 
 | Resultado da EDA | Consequência para a regressão |
 |---|---|
 | A correlação mais alta com o target é a do `bmi` (r ≈ 0.07). Todas as outras são ainda mais próximas de 0. | Na regressão simples, R² = r². Mesmo a melhor feature explicará **menos de 1%** da variância. **Não esperamos um bom modelo.** |
 | As features são praticamente independentes entre si, exceto pares contínua/discretizada (`age`/`age_level`, `bmi`/`bmi_level`). | Juntar features pode acumular pequenos contributos, mas só faz sentido usar **uma versão** de cada variável. |
-| `calcium_baseline` é constante; `systolic_index` e `age_normalized` são cópias de outras features. | São removidas antes de modelar. |
+| `calcium_baseline` é constante; `systolic_index` e `age_normalized` são cópias de outras features; `ldl_alternative` tem os valores de `ldl` trocados entre pacientes (não pertence ao paciente da linha). | São removidas antes de modelar. |
 
 O objetivo desta parte é, por isso, **testar de forma rigorosa** se alguma feature ou combinação consegue prever
 o target melhor do que um modelo sem informação, e **explicar porquê** umas combinações funcionam melhor que
@@ -58,7 +58,7 @@ e 220 nas primeiras linhas.
 ''',
 
 'prep': '''
-**Conclusões:** ficam **31 features candidatas** (35 colunas − 3 removidas − 2 targets), das quais 18 são
+**Conclusões:** ficam **30 features candidatas** (35 colunas − 4 removidas − 2 targets), das quais 17 são
 numéricas contínuas e 13 vêm de categóricas codificadas. `employment_status` deu origem a 2 colunas
 (`Retired` e `Unemployed`; `Employed` é a categoria de referência, representada por 0 nas duas). A codificação não
 gerou valores em falta.
@@ -105,9 +105,9 @@ bom.
   R² = r².
 - **`bmi` é a melhor feature** em todos os critérios: maior R² de treino, menor RMSE de CV (41.309) e o p-value
   mais baixo (0.0055). Seguem-se `age` (RMSE 41.323) e `age_level` (41.339).
-- **6 das 31 features têm β₁ significativo** (p < 0.05): `bmi`, `age`, `age_level`, `smoking`, `salt_intake` e
+- **6 das 30 features têm β₁ significativo** (p < 0.05): `bmi`, `age`, `age_level`, `smoking`, `salt_intake` e
   `triglycerides`.
-- Apenas **11 das 31** têm RMSE de CV abaixo da baseline, e **nenhuma tem R² de CV positivo** (o melhor é −0.0024,
+- Apenas **11 das 30** têm RMSE de CV abaixo da baseline, e **nenhuma tem R² de CV positivo** (o melhor é −0.0024,
   do `bmi`).
 
 **Justificação — porque é que estas features ficam à frente?** São as que têm maior |r| com o target (secção
@@ -133,7 +133,7 @@ mais do dobro do percentil 95 do ruído. **A relação é real**, e não um acas
 gráfico mostra que todas as features vivem na mesma escala minúscula que o ruído (0 a 0.006). A relação existe,
 mas é demasiado fraca para ter utilidade prática.
 
-As restantes 23 features ficam dentro da distribuição do ruído: **não se distinguem de números aleatórios**, o
+As restantes 22 features ficam dentro da distribuição do ruído: **não se distinguem de números aleatórios**, o
 que coincide com as features "pouco informativas" identificadas na EDA.
 ''',
 
@@ -281,12 +281,13 @@ funcione melhor do que as combinações com `bmi` e `age`.
 
 'groups': '''
 **Conclusões:**
-- Só **3 grupos** ficam abaixo da baseline: **antropométrico + glicémico** (RMSE 41.208), antropométrico (41.248)
-  e glicémico (41.353).
+- Só **4 grupos** ficam abaixo da baseline: **antropométrico + glicémico** (RMSE 41.208), antropométrico (41.248),
+  glicémico (41.353) e, por muito pouco, todas as numéricas contínuas (41.373 contra 41.385).
 - Os grupos **lipídico, pressão arterial, inflamatório, estilo de vida e sociodemográfico ficam todos acima da
   baseline**: prevêem pior do que a média.
-- O grupo com **todas as 18 numéricas contínuas** também fica acima da baseline (41.420), apesar de ter o maior R²
-  de treino (0.030).
+- O grupo com **todas as 17 numéricas contínuas** tem o maior R² de treino (0.029), mas em validação cruzada fica
+  praticamente igual à baseline (41.373 contra 41.385). O pouco sinal de `age` e `bmi` é quase todo anulado pelo
+  ruído das outras 15 features.
 
 **Justificação:** um grupo funciona se contiver features relacionadas com o target. Os grupos vencedores são os
 que incluem `age` e `bmi`, as únicas com sinal real. Os outros grupos são formados por features com r ≈ 0 (EDA,
@@ -298,14 +299,14 @@ nome e as unidades do target continuam desconhecidos.
 ''',
 
 'all_features': '''
-**Conclusões:** com as 31 features:
-- o **R² de treino é o mais alto de todos (0.0375)** e o teste *F* é significativo (p = 0.009);
-- mas o **R² de CV é −0.028** e o RMSE de CV é **41.84, claramente pior que a baseline (41.38)**;
-- o R² ajustado (0.0157) é mais baixo que o de modelos com menos features (secção 3.2);
+**Conclusões:** com as 30 features:
+- o **R² de treino é o mais alto de todos (0.0370)** e o teste *F* é significativo (p = 0.007);
+- mas o **R² de CV é −0.026** e o RMSE de CV é **41.79, claramente pior que a baseline (41.38)**;
+- o R² ajustado (0.0159) é mais baixo que o de modelos com menos features (secção 3.2);
 - 4 coeficientes são significativos: `bmi_level`, `bmi`, `triglycerides` e `salt_intake`. Dois deles são o par
   colinear `bmi`/`bmi_level`, cujos coeficientes ficam distorcidos (ver 3.6).
 
-**Justificação:** isto é ***overfitting***. Com 31 coeficientes para estimar e quase nenhum sinal real, o modelo
+**Justificação:** isto é ***overfitting***. Com 30 coeficientes para estimar e quase nenhum sinal real, o modelo
 usa a sua flexibilidade para se ajustar a padrões aleatórios do treino. Esses padrões não existem nos dados de
 validação, por isso **o modelo com mais features é o que pior generaliza**.
 
@@ -383,7 +384,7 @@ princípio da parcimónia (preferir o modelo mais simples quando o desempenho é
 | Juntar features ajuda? | **Um pouco, até ~4–7 features** | RMSE de CV 41.31 (1 feature) → 41.19 (7) |
 | Qual é o melhor grupo? | **`bmi`, `age`, `smoking`, `salt_intake`, `triglycerides`, `physical_activity`, `HbA1c_level`** | Menor RMSE de CV entre construção incremental, 286 combinações e 9 grupos clínicos |
 | Porque é que `bmi` + `age` é o melhor par? | São as 2 features com mais sinal **e** são independentes entre si | r = 0.074 e 0.070; correlação entre ambas −0.007 |
-| E com todas as features? | **Pior que a baseline** | *Overfitting*: R² de treino 0.0375, R² de CV −0.028 |
+| E com todas as features? | **Pior que a baseline** | *Overfitting*: R² de treino 0.0370, R² de CV −0.026 |
 | Usar contínua + discretizada? | **Não** | Coeficientes instáveis e inflacionados, sem ganho de previsão |
 | Faz sentido? | **Sim** | Combinar features fracas e independentes soma R² pequenos (0.0055 + 0.0049 + …), mas o total fica em ~2% |
 ''',
@@ -397,12 +398,12 @@ princípio da parcimónia (preferir o modelo mais simples quando o desempenho é
 | Baseline (média) | −0.006 | 34.29 | 41.02 |
 | Simples (`bmi`) | −0.002 | 34.18 | 40.95 |
 | **Múltipla (7 features)** | **0.005** | **34.11** | **40.81** |
-| Todas as features (31) | −0.021 | 34.35 | 41.33 |
+| Todas as features (30) | −0.018 | 34.31 | 41.26 |
 
 - **A regressão múltipla é a melhor nas três métricas**, seguida da simples e da baseline. **A ordem é a mesma que
   em validação cruzada**: as escolhas feitas só com o treino generalizaram de forma coerente.
-- O modelo com todas as features é **o pior**, abaixo da baseline. Tem o maior R² de treino (0.0375) e o menor de
-  teste (−0.021), o que confirma o *overfitting* detetado em 3.5.
+- O modelo com todas as features é **o pior**, abaixo da baseline. Tem o maior R² de treino (0.0370) e o menor de
+  teste (−0.018), o que confirma o *overfitting* detetado em 3.5.
 - As melhorias são **muito pequenas**: a múltipla erra em média **34.11** contra **34.29** da baseline, menos 0.18
   unidades (**0.5%**).
 - Em todos os modelos o R² de teste é menor que o de treino, como esperado.
@@ -414,7 +415,7 @@ princípio da parcimónia (preferir o modelo mais simples quando o desempenho é
 - **Diferença de RMSE face à baseline:**
   - simples: −0.065, IC95% **[−0.29, +0.15]**;
   - múltipla: −0.194, IC95% **[−0.74, +0.32]**;
-  - todas as features: +0.322, IC95% [−0.30, +0.94].
+  - todas as features: +0.256, IC95% [−0.37, +0.87].
 - **Todos os intervalos incluem o zero.**
 
 **Justificação:** como o zero está dentro de todos os intervalos, **não podemos afirmar, com 95% de confiança,
@@ -463,7 +464,7 @@ modelo múltiplo "abre" um pouco mais a faixa do que o simples, mas continua lon
 | | **Regressão Linear Simples** | **Regressão Linear Múltipla** |
 |---|---|---|
 | Features | `bmi` | `bmi`, `age`, `smoking`, `salt_intake`, `triglycerides`, `physical_activity`, `HbA1c_level` |
-| Como foram escolhidas | Melhor de 31 features, testadas uma a uma | Construção incremental, confirmada por 286 combinações e 9 grupos clínicos |
+| Como foram escolhidas | Melhor de 30 features, testadas uma a uma | Construção incremental, confirmada por 286 combinações e 9 grupos clínicos |
 | R² treino | 0.0055 | 0.0233 |
 | R² teste | −0.002 | **0.005** |
 | MAE teste | 34.18 | **34.11** |
@@ -489,7 +490,7 @@ mesmo que prever sempre a média (34.29). As diferenças não são estatisticame
 3. **As features que mais ajudam são as que têm maior |r| e estão acima do ruído** (`bmi`, `age`). As que pioram o
    modelo são as que, na EDA e no teste do ruído (2.3), não se distinguem de números aleatórios (`hdl`,
    `alcohol_intake`, `heart_rate`…).
-4. **Mais features não é melhor.** Com 31 features o modelo memoriza ruído do treino (*overfitting*) e fica pior do
+4. **Mais features não é melhor.** Com 30 features o modelo memoriza ruído do treino (*overfitting*) e fica pior do
    que a média em dados novos (3.5 e 4.1).
 5. **A forma do modelo não é o problema.** Os resíduos não mostram curvatura; polinómios e `log1p` não trazem
    ganhos robustos (2.7 e 3.7).

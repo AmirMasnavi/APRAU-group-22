@@ -54,3 +54,8 @@ Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft not
 - Key results (10-fold strat.): LR default recall DI_HT 0.07, LDA 0.19; LDA default best macro-F1 0.645 (p=0.043 vs LR); weighted: LR bal_acc 0.714 vs LDA 0.686 (n.s.). LDA assumptions violated (Shapiro, Levene). Recommended: LDA (equal priors for screening).
 - Variance: holdout dp 0.02–0.036 (100 seeds); k-fold estimate dp 0.004–0.011; LOOCV deterministic; bootstrap OOB pessimistic (~63% distinct). k effect: between-fold dp rises with k, estimate dp falls; recommend 10-fold for Part 4.
 - Not committed.
+
+## 2026-10-28 — Regression updated for final EDA (01_EDA)
+- `ldl_alternative` added to DROP_EDA in `scripts/build_regression.py` (EDA decided to remove it: values of `ldl` permuted across rows). Now 30 candidate features (17 continuous). Rebuilt `notebooks/02_regression.ipynb`; texts in `scripts/regression_findings.py` updated.
+- Chosen models and their test results unchanged (ldl_alternative was never selected). Changed: all-features model (train R² 0.0370, CV RMSE 41.79, test RMSE 41.26), lipid group, and "all continuous" group now marginally beats baseline (41.373 vs 41.385).
+- OPEN: docs/agent.md now says seed 42 (commit 0a59270), but regression and classification builders still use SEED = 22. Group must decide; switching regression to 42 changes the chosen simple feature (bmi → HbA1c_level) and requires rewriting texts.

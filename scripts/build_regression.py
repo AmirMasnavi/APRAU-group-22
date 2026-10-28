@@ -1,6 +1,6 @@
 """Build and execute notebooks/02_regression.ipynb (Parte 2: Regressão Linear).
 
-Estrutura igual à da EDA_version3: cada passo tem (1) uma explicação do que se vai fazer e porquê,
+Estrutura igual à da EDA (01_EDA): cada passo tem (1) uma explicação do que se vai fazer e porquê,
 (2) o código e (3) as conclusões justificadas, escritas a partir dos outputs executados
 (ver scripts/regression_findings.py).
 """
@@ -85,12 +85,14 @@ step('''
 
 **O que fazemos e porquê:**
 
-1. **Removemos as 3 features que a EDA (secção 4.2) mostrou não terem informação nova:**
+1. **Removemos as 4 features que a EDA (`01_EDA`) decidiu remover:**
    - `calcium_baseline`: é constante (9.42 em todas as linhas). Uma variável que não varia não consegue explicar
      a variação do target. Além disso, numa regressão ficaria colinear com o intercepto β₀.
    - `systolic_index`: é uma cópia exata de `systolic_bp`. Com as duas no modelo, a matriz $X^TX$ fica singular e
      $\\hat\\beta = (X^TX)^{-1}X^Ty$ deixa de ter solução única (slide 21).
-   - `age_normalized`: é uma reescala de `age`, com o mesmo problema.
+   - `age_normalized`: é uma reescala de `age`, com o mesmo problema;
+   - `ldl_alternative`: tem os mesmos valores de `ldl`, mas trocados entre pacientes (coincide em só 18 de 2000
+     linhas). O valor não pertence ao paciente da linha, por isso é ruído e não deve entrar no modelo.
 
 2. **Convertemos as categóricas em números**, porque a regressão linear só trabalha com valores numéricos:
    - **ordinais** (têm uma ordem natural, ex.: Low < Medium < High) → códigos 0, 1, 2…, que preservam a ordem
@@ -107,7 +109,7 @@ As features "pouco informativas" da EDA **não** são removidas aqui. A ideia de
 e deixar que os resultados confirmem (ou não) o que a EDA sugeriu.
 ''', '''
 TARGET = 'target_regression'
-DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized']
+DROP_EDA = ['calcium_baseline', 'systolic_index', 'age_normalized', 'ldl_alternative']
 
 ORDINAL = {
     'age_level':         ['Young', 'Middle', 'Mature', 'Senior'],
@@ -249,7 +251,7 @@ expected.sort_values('r2 = R2 maximo esperado', ascending=False).head(10)
 step('''
 ### 2.2 Testar todas as features, uma de cada vez
 
-Para cada uma das 31 features ajustamos uma regressão simples e registamos:
+Para cada uma das 30 features ajustamos uma regressão simples e registamos:
 - **R² de treino** (deve coincidir com r² da tabela anterior);
 - **β₁ e o seu p-value** (teste *t* para $H_0: \\beta_1 = 0$, slide 18). Um p-value < 0.05 indica que a relação
   é estatisticamente significativa;
@@ -520,7 +522,7 @@ GROUPS = {
     'Antropométrico (age, bmi)':              ['age', 'bmi'],
     'Antropométrico + glicémico':             ['age', 'bmi', 'HbA1c_level'],
     'Glicémico (HbA1c)':                      ['HbA1c_level'],
-    'Lipídico':                               ['cholesterol', 'triglycerides', 'hdl', 'ldl', 'ldl_alternative'],
+    'Lipídico':                               ['cholesterol', 'triglycerides', 'hdl', 'ldl'],
     'Pressão arterial / cardíaco':            ['systolic_bp', 'diastolic_bp', 'blood_pressure', 'heart_rate'],
     'Inflamatório':                           ['crp_level', 'homocysteine_level', 'plasma_value'],
     'Estilo de vida':                         ['smoking', 'physical_activity', 'stress_level', 'sugar_consumption',
@@ -537,7 +539,7 @@ groups.sort_values('cv_rmse')
 step('''
 ### 3.5 E se usarmos todas as features? *Overfitting*
 
-A tentação natural é "pôr tudo no modelo". Ajustamos a regressão com as 31 features e comparamos o desempenho no
+A tentação natural é "pôr tudo no modelo". Ajustamos a regressão com as 30 features e comparamos o desempenho no
 **treino** com o desempenho em **validação cruzada**. Uma diferença grande entre os dois é o sinal clássico de
 ***overfitting***: o modelo ajusta-se ao ruído específico dos dados de treino, que não se repete em dados novos.
 ''', '''
