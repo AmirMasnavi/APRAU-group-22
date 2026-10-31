@@ -175,7 +175,9 @@ why that is consistent with the EDA evidence, and what it costs in performance.*
 
 See `docs/eda_findings.md` for the numbers. The short version, and it is unusual:
 
-- **Our VIF values are all below 1.05** once the three redundant columns are removed. The Hitters
+- **Our VIF values are all below 1.05** (max 1.0441) once the four columns the EDA rejected are removed
+  (`calcium_baseline`, `systolic_index`, `age_normalized`, `ldl_alternative`); the EDA computes this in
+  §3.2. The Hitters example has VIF up to 503. The Hitters
   example has VIF up to 503. **Ridge's main justification does not apply to our data**, so it is
   predictable that Ridge will bring little or no gain. Say so, and back it with the VIF evidence.
 - **Lasso is the method that should matter here**, not because of collinearity but because the EDA
@@ -188,7 +190,8 @@ See `docs/eda_findings.md` for the numbers. The short version, and it is unusual
 
 ## 7. Checklist for Part 5
 
-- [ ] Standardize inside a `Pipeline`, fit on training folds only.
+- [ ] Standardize **inside each CV fold** with an explicit loop. **No `Pipeline`, no `GridSearchCV`** —
+      the user has not been taught them and they must not appear in the notebooks.
 - [ ] Stratified splits (severe class imbalance — see `docs/eda_findings.md`).
 - [ ] Tune `C` by cross-validation for both L1 and L2.
 - [ ] Report **all features vs reduced set**, for both penalties.
@@ -197,3 +200,69 @@ See `docs/eda_findings.md` for the numbers. The short version, and it is unusual
 - [ ] Cross-check the surviving set against the EDA ranking and comment on agreement/disagreement.
 - [ ] Explain the Ridge result using the VIF evidence.
 - [ ] Credit the slides and ISLP ch. 6 in the references.
+
+---
+
+## 8. Results obtained (verified against `notebooks/05_feature_selection.ipynb`, 34 cells, 13 code)
+
+**Seed: `RANDOM_STATE = 22`** everywhere (changed from 42 on 2026-10-31). The EDA notebooks were changed
+too, but **no EDA number moved**: `RANDOM_STATE` is declared there and never used — the EDA has no
+`random_state`, `np.random`, `.sample(` or `shuffle` in any cell, so it is fully deterministic. Every
+number below is from the seed-22 run.
+
+Setup: 4 EDA columns dropped → **29 variables (17 num + 12 cat) → 39 encoded columns**; stratified
+75/25 holdout (1500/500); `saga`, `l1_ratio` ∈ {0, 1, 0.5}, `max_iter=10000`; manual stratified 5-fold
+CV, scaler refitted inside every fold.
+
+- **Two counts, never conflate them** — named with the total built in: `colunas mantidas (de 39)` =
+  non-zero coefficient columns (a column counts if non-zero for at least one of the 3 classes) and
+  `variaveis mantidas (de 29)` = original variables still in the model (counts if **any** of its dummy
+  columns survives). They differ because each k-level categorical occupies k−1 dummies. The variable
+  count is **meaningless for Ridge**: at C=0.001 Ridge "keeps" 29 variables yet scores 0.3155 (trivial).
+- **Path, all three penalties, scored by CV** (`C` 1e-3..1e2, 12 points):
+  variables kept — Ridge **flat at 29 everywhere** · Lasso 0/0/2/4/**11**/**15**/23/27/28/28/29/29 ·
+  Elastic Net 0/1/2/10/16/22/26/28/28/29/29/29.
+  CV F1 peaks at **0.6303** (Ridge at C=1.5199, EN at 4.3288); Lasso 0.6293 at 4.3288. sd ≈ 0.032.
+  Under heavy penalty **Ridge wins** (0.5786 vs 0.5242 at C=0.0231). From C≈35 all three flatten at
+  0.6244 = unregularized, so regularizing is worth **+0.0059** macro F1.
+- **Section 5 does not recompute**: it takes the argmax of each curve from the section-4 path.
+- **Refinement** (9 points between the two neighbours): Ridge stays at 1.5199 (gain 0), Lasso moves to
+  5.6234 (+0.0010), EN to 3.3322 (gain 0). After it **all three are exactly 0.6303 ± 0.0318**. The
+  refined C changes **zero** of the 500 test predictions.
+- **Test, full set, all three**: accuracy 0.9440, balanced acc 0.6185, macro F1 0.5978, and
+  **recall `DI_HT` = 0.0000** (not one of the 21 cases detected).
+- **Full vs reduced** (C retuned in two phases per set and per penalty):
+  29 vars → 0.6303 (sd 0.0318) · **15 vars → 0.6472, i.e. +0.0169 BETTER, and sd drops to 0.0247** ·
+  11 vars → 0.6201 (−0.0102, sd jumps to 0.0635). Cutting to ~half the variables *improves* CV macro F1
+  here; the gain is still below the between-fold sd, so state it as evidence, not proof.
+  Cut points C = 0.0658 (11 vars) and C = 0.1874 (15 vars), justified in the notebook as a **granularity
+  judgement, stated as such** (below → 4 vars, above → 23 of 29). The one-standard-error rule would be
+  the principled alternative **but is NOT in the course slides** (T5 picks λ by plain CV minimum via
+  `RidgeCV`), so it is deliberately not used.
+  **The sets are NOT nested**: `age` and `bmi` are in the 11-var set but not in the 15-var one — with
+  more budget the Lasso swaps them for `age_level` and `bmi_level`. 11 of the 14 variables dropped at
+  the 15-var cut are exactly the EDA's uninformative list.
+- **Coefficients** (max |β| over the 3 classes, Lasso): `HbA1c_level` 3.42 ≫ `bmi_level_Underweight`
+  1.80 > `triglycerides` 1.02 > `bmi_level_Obese` 0.99. Ridge shrinks the dominant ones more (2.19).
+- **Imbalance** (same two-phase C tuning): without weights C* = 1.5199, recall `DI_HT` = 0.0000 (0 of
+  21: 17 → `DI_HY`, 4 → `HT`). With `class_weight='balanced'` C* = 0.0137 (coarse 0.0081, gain +0.0028),
+  **~100× stronger**: recall 0.5238 (11 of 21) at the cost of 60 `DI_HY` called `DI_HT`, precision
+  0.1528. Unlike the seed-42 run, **macro F1 on test IMPROVES** (0.5978 → 0.6585) and `HT` recall rises
+  0.8621 → 0.9655, because a zero recall on one class drags the macro average down hard.
+- **Why section 9 is L2-only — do not "fix" it.** `class_weight='balanced'` gives weights 0.371 / 5.682
+  / 7.812 (ratio 21). Verified on this data: `saga` fails to converge for **all three** penalties at
+  C = 1.17 and C = 0.0231, max_iter 10000, tol 1e-4 and 1e-3 (12/12 non-converged), and at 50k/200k too.
+  `liblinear` raises `ValueError: The 'liblinear' solver does not support multiclass classification
+  (n_classes >= 3)`. `lbfgs` converges but raises `ValueError: Solver lbfgs supports only 'l2' or None
+  penalties` for l1_ratio 0.5 and 1.0. A `OneVsRestClassifier(liblinear)` wrapper **does** work, but it
+  changes the multiclass strategy, performs worse (bal acc 0.7393 vs 0.7624 on the seed-42 run) and the
+  Lasso keeps 39/39 columns — **no sparsity**, so it defeats the section's purpose.
+- **VIF now lives in the EDA (added 2026-10-31), §3.2.** Section 10 of the feature-selection notebook
+  cites it and the citation is backed by executed output: with the redundant columns present the
+  correlation matrix has rank 19 of 20 (an exact linear dependency), so VIF is **not computable**, and
+  the condition number is 1.75e+15; pairwise, `age`/`age_normalized` gives VIF ≈ 5.1e+11 and
+  `systolic_bp`/`systolic_index` ≈ 4.5e+15, while `ldl`/`ldl_alternative` gives **1.00002** — that one
+  is not collinear at all, it is removed for a different reason. After removing the three, the
+  condition number drops to 1.29 and max VIF is 1.0441 (`homocysteine_level`).
+- **Known limitation, stated in the notebook**: the reduced sets come from a Lasso fitted on the whole
+  training set, so their CV scores are mildly optimistic. The test set was never used to decide anything.

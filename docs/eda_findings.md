@@ -3,11 +3,24 @@
 **Purpose.** Every result and conclusion from the EDA, so later stages can cite the evidence without
 re-reading the notebook.
 
-**Source.** `notebooks/EDA_version3.ipynb` (PT) / `notebooks/EDA_version3_en.ipynb` (EN), seed 42,
-run on `dataset_grupo_22.csv`. Section numbers below refer to the notebook.
+**Source.** `notebooks/01_EDA.ipynb` (PT) / `notebooks/01_EDA_en.ipynb` (EN), run on
+`dataset_grupo_22.csv`. Section numbers below refer to the notebook. `RANDOM_STATE` is 22 but is
+**declared and never used**: the EDA contains no `random_state`, `np.random`, `.sample(` or `shuffle`,
+so it is fully deterministic and the seed does not affect a single number here.
 **All figures here were verified against the executed outputs.**
 
 ---
+
+## 0b. Multicollinearity (§3.2, added 2026-10-31)
+
+With the 20 original numeric columns (minus the constant `calcium_baseline`): correlation matrix
+**rank 19 of 20** → an exact linear dependency, so **VIF is not computable**; condition number
+**1.75e+15**. Pairwise VIF: `age`/`age_normalized` **5.09e+11** · `systolic_bp`/`systolic_index`
+**4.50e+15** · `ldl`/`ldl_alternative` **1.00002** (no collinearity — that column is removed because its
+values are a row permutation of `ldl`, not because of collinearity).
+After removing the three: condition number **1.29**, **all VIF < 1.05**, max **1.0441**
+(`homocysteine_level`), then `blood_pressure` 1.0414.
+**Consequence for Part 5: Ridge has nothing to stabilize.**
 
 ## 1. Dataset
 
