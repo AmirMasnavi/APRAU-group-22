@@ -79,6 +79,12 @@ Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft not
   explicit loops over the splitters: `fit_linear`/`cv_scores` in regression, `ajustar`/`prever_por_cv`/
   `pontuacoes_por_fold` in classification. **All outputs stayed numerically identical** except the LOOCV
   wall-clock times, which rose (the old `cross_val_predict(n_jobs=-1)` was parallel, the manual loop is serial).
-  Those times are quoted in the text and vary per run; re-check them after any re-execution.
+- **LOOCV times are the only number in the merged notebooks that changes between runs**, and they are quoted in
+  three places in Part 3: the results table of section 12.4, the bullet right under it, and the "Computational
+  cost (LOOCV)" row of section 15.1. **Re-check those three after every re-execution.** Measured so far:
+  14/9/18/8 s, then 64/12/79/12 s (PT) and 69/12/83/11 s (EN) on a busier machine. The absolute values are
+  machine-dependent; the stable fact is the **ratio**, LDA about 5 to 8 times faster than Logistic, and the text
+  now states the ratio alongside the seconds.
+- The merged notebooks were renamed by the user to `00_trabalho_1.ipynb` (PT) and `00_assignment_1.ipynb` (EN).
 - `02_regression_en.ipynb` was created (it did not exist before); it reproduces the PT numbers exactly.
 - Seed is 22 everywhere (`SEED` in parts 2–3, `RANDOM_STATE` in parts 1 and 4).
