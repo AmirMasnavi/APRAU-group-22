@@ -65,3 +65,20 @@ Initial CSV SHA-256 recorded in data.md; assignment text read in full. Draft not
 
 - `ldl_alternative` removed (30 features) in `build_classification.py` / `_en.py`; all references to slides/class exercises removed from notebook texts (only ISLP and scikit-learn docs remain as references). Both notebooks rebuilt, no errors; findings texts rewritten with new numbers.
 - Key changes: LDA vs Logistic (unadjusted) macro-F1 now +0.047, p = 0.054 (was 0.043 → now borderline, not significant); with adjustment LDA wins macro-F1 in 6/6 methods (incl. LOOCV). Recommendation unchanged: LDA (equal priors for screening). LOOCV timings vary between runs, so texts use approximate values.
+
+## 2026-10-31 — Merged notebooks built, pipelines removed
+
+- **`notebooks/00_trabalho_completo.ipynb` and `00_trabalho_completo_en.ipynb`** are the deliverable: all four
+  parts in assignment order, 233 cells, 79 code cells, sections numbered **continuously 0–26** (Part 1 keeps
+  0–4, Part 2 is 5–9, Part 3 is 10–15, Part 4 is 16–26). Every cross-reference in the text was remapped to that
+  numbering; references to the *assignment's own* section numbers were left untouched.
+- The four standalone notebooks keep their own 1..N numbering and are still the place to edit. **Rebuild the
+  merged ones from them** with the scripts pattern in the 2026-10-31 session (renumber headings, remap refs,
+  add cover + 3 bridge cells).
+- **`make_pipeline` was removed from `02_regression` and `03_classification`** (user instruction). Replaced by
+  explicit loops over the splitters: `fit_linear`/`cv_scores` in regression, `ajustar`/`prever_por_cv`/
+  `pontuacoes_por_fold` in classification. **All outputs stayed numerically identical** except the LOOCV
+  wall-clock times, which rose (the old `cross_val_predict(n_jobs=-1)` was parallel, the manual loop is serial).
+  Those times are quoted in the text and vary per run; re-check them after any re-execution.
+- `02_regression_en.ipynb` was created (it did not exist before); it reproduces the PT numbers exactly.
+- Seed is 22 everywhere (`SEED` in parts 2–3, `RANDOM_STATE` in parts 1 and 4).
