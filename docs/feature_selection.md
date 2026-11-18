@@ -231,17 +231,24 @@ CV, scaler refitted inside every fold.
   refined C changes **zero** of the 500 test predictions.
 - **Test, full set, all three**: accuracy 0.9440, balanced acc 0.6185, macro F1 0.5978, and
   **recall `DI_HT` = 0.0000** (not one of the 21 cases detected).
-- **Full vs reduced** (C retuned in two phases per set and per penalty):
-  29 vars → 0.6303 (sd 0.0318) · **15 vars → 0.6472, i.e. +0.0169 BETTER, and sd drops to 0.0247** ·
-  11 vars → 0.6201 (−0.0102, sd jumps to 0.0635). Cutting to ~half the variables *improves* CV macro F1
-  here; the gain is still below the between-fold sd, so state it as evidence, not proof.
-  Cut points C = 0.0658 (11 vars) and C = 0.1874 (15 vars), justified in the notebook as a **granularity
-  judgement, stated as such** (below → 4 vars, above → 23 of 29). The one-standard-error rule would be
-  the principled alternative **but is NOT in the course slides** (T5 picks λ by plain CV minimum via
-  `RidgeCV`), so it is deliberately not used.
-  **The sets are NOT nested**: `age` and `bmi` are in the 11-var set but not in the 15-var one — with
-  more budget the Lasso swaps them for `age_level` and `bmi_level`. 11 of the 14 variables dropped at
-  the 15-var cut are exactly the EDA's uninformative list.
+- **Full vs reduced — rewritten 2026-11-17 to use the ONE-STANDARD-ERROR RULE** (the professor asked for
+  it in the assessment; my earlier note that it is "not in the slides" is void — **do not revert it**).
+  Section 23 now applies it to a **Lasso-only, 30-point** path (`np.logspace(-3, 2, 30)`; the 12-point
+  grid of §19 is too coarse, it jumps 23 → 27 vars between consecutive points):
+  `SE = sd_between_folds / sqrt(k)`; `threshold = max(F1_CV) − SE`; pick the **most penalized** point
+  above it (= `glmnet`'s `lambda.1se` vs `lambda.min`).
+  Result: `lambda.min` C = 6.2102, F1 = 0.6303, sd = 0.0318, **se = 0.0142**, threshold **0.6160** →
+  **`lambda.1se` C = 1.2690, 27 of 29 variables** (36 of 39 columns), CV F1 0.6233 (loss 0.0069).
+  Removed: **`age` and `heart_rate`**.
+  **On the TEST set the reduced model is slightly better**: macro F1 **0.6020 vs 0.5978**; accuracy
+  (0.9440), balanced accuracy (0.6185) and all three per-class recalls are **identical**, so the models
+  are operationally equivalent — do not over-read the 0.0042.
+  `age` leaving is NOT a contradiction with the EDA (η² = 0.013, p = 6.2e-06): `age_level` survives and
+  encodes the same, step-like relationship better (EDA §3.7).
+  Caveats recorded in the notebook: modest reduction (the between-fold sd is small vs the curve's drop);
+  the curve is **non-monotone** (C = 0.2593 → 0.6135 with 17 vars beats C = 0.5736 → 0.6064 with 23), so
+  the pick can move with the CV seed; `avaliar_cv` uses `np.std` (ddof=0), which makes the threshold
+  **more conservative** than the sample sd would — the chosen point is the same either way.
 - **Coefficients** (max |β| over the 3 classes, Lasso): `HbA1c_level` 3.42 ≫ `bmi_level_Underweight`
   1.80 > `triglycerides` 1.02 > `bmi_level_Obese` 0.99. Ridge shrinks the dominant ones more (2.19).
 - **Imbalance** (same two-phase C tuning): without weights C* = 1.5199, recall `DI_HT` = 0.0000 (0 of
